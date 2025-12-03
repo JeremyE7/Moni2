@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Transaction, Subscription, MoniData } from '../types';
+import { Transaction, Subscription, MoniData, AiAnalysis } from '../types';
 
 const STORAGE_KEY = 'moni_data_v1';
 
 const DEFAULT_DATA: MoniData = {
   transactions: [],
   subscriptions: [],
+  apiKey: '',
 };
 
 export const useMoniData = () => {
@@ -17,7 +18,12 @@ export const useMoniData = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setData(JSON.parse(stored));
+        const parsedData = JSON.parse(stored);
+        // Ensure new fields exist for backward compatibility
+        setData({
+            ...DEFAULT_DATA,
+            ...parsedData
+        });
       }
     } catch (e) {
       console.error("Error loading data", e);
@@ -96,12 +102,32 @@ export const useMoniData = () => {
     }));
   };
 
+  const setApiKey = (key: string) => {
+    setData(prev => ({
+        ...prev,
+        apiKey: key
+    }));
+  };
+
+  const saveAnalysis = (content: string) => {
+    setData(prev => ({
+        ...prev,
+        lastAnalysis: {
+            date: new Date().toISOString(),
+            content
+        }
+    }));
+  };
+
   const importData = useCallback((jsonString: string) => {
     try {
       const parsed = JSON.parse(jsonString);
       // Basic validation
       if (Array.isArray(parsed.transactions) && Array.isArray(parsed.subscriptions)) {
-        setData(parsed);
+        setData({
+            ...DEFAULT_DATA,
+            ...parsed
+        });
         return { success: true, message: "Datos importados correctamente." };
       } else {
         return { success: false, message: "Formato de archivo inválido." };
@@ -138,6 +164,8 @@ export const useMoniData = () => {
     deleteSubscription,
     importData,
     exportData,
-    clearAllData
+    clearAllData,
+    setApiKey,
+    saveAnalysis
   };
 };

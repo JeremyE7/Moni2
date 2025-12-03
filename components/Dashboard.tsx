@@ -1,18 +1,23 @@
-import React, { useMemo, useRef, useLayoutEffect } from 'react';
+import React, { useMemo, useRef, useLayoutEffect, useState } from 'react';
 import { MoniData, Subscription } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as ReTooltip, Legend } from 'recharts';
-import { Wallet, TrendingUp, TrendingDown, RefreshCw, BellRing, AlertOctagon } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, RefreshCw, BellRing, AlertOctagon, Sparkles, BrainCircuit, ChevronRight } from 'lucide-react';
 import gsap from 'gsap';
+import { GoogleGenAI } from "@google/genai";
 
 interface Props {
   data: MoniData;
+  onUpdateAnalysis?: (content: string) => void;
+  onNavigateSettings?: () => void;
 }
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'];
 
-export const Dashboard: React.FC<Props> = ({ data }) => {
+export const Dashboard: React.FC<Props> = ({ data, onUpdateAnalysis, onNavigateSettings }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const aiRef = useRef<HTMLDivElement>(null);
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const [analyzing, setAnalyzing] = useState(false);
 
   // Animations
   useLayoutEffect(() => {
@@ -38,7 +43,16 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
         clearProps: "all"
       });
 
-      // Animate alerts if any
+      // Animate AI section
+      gsap.from(".ai-card", {
+        scale: 0.95,
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.1,
+        ease: "power2.out",
+        clearProps: "all"
+      });
+      
       if (document.querySelector(".alert-card")) {
         gsap.from(".alert-card", {
           x: -20,
@@ -53,7 +67,7 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [data]); // Re-run when data updates to catch new alerts or changes
+  }, [data]);
 
   // Helper to calculate upcoming reminders
   const reminders = useMemo(() => {
@@ -64,9 +78,7 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
     data.subscriptions.forEach(sub => {
       if (!sub.active || !sub.reminderType || sub.reminderType === 'none') return;
 
-      // Determine next billing date
       let nextBillingDate = new Date(today.getFullYear(), today.getMonth(), sub.billingDay);
-      // If billing day already passed this month, look at next month
       if (nextBillingDate < today) {
         nextBillingDate = new Date(today.getFullYear(), today.getMonth() + 1, sub.billingDay);
       }
@@ -74,15 +86,12 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
       const diffTime = nextBillingDate.getTime() - today.getTime();
       const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Check conditions
       if (sub.reminderType === 'payment') {
-        // Default to 3 days if not specified
         const threshold = sub.reminderDays ?? 3;
         if (daysUntil <= threshold) {
           alerts.push({ sub, daysUntil, type: 'payment' });
         }
       } else if (sub.reminderType === 'cancel') {
-        // Fixed 7 days for cancellation
         if (daysUntil <= 7) {
           alerts.push({ sub, daysUntil, type: 'cancel' });
         }
@@ -93,35 +102,18 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
   }, [data.subscriptions]);
 
   const stats = useMemo(() => {
-    // Filter transactions for current month
     const monthlyTransactions = data.transactions.filter(t => t.date.startsWith(currentMonth));
-    
-    const income = monthlyTransactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-      
-    const expense = monthlyTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    // Calculate active subscriptions total
-    const subscriptionsTotal = data.subscriptions
-      .filter(s => s.active)
-      .reduce((sum, s) => sum + s.amount, 0);
-
+    const income = monthlyTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expense = monthlyTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const subscriptionsTotal = data.subscriptions.filter(s => s.active).reduce((sum, s) => sum + s.amount, 0);
     const totalExpense = expense + subscriptionsTotal;
     const balance = income - totalExpense;
 
-    // Group expenses by category for Pie Chart
     const expensesByCategory: Record<string, number> = {};
-    
-    // Add transaction expenses
     monthlyTransactions.filter(t => t.type === 'expense').forEach(t => {
       const catName = t.category.includes(':') ? t.category.split(':')[0] : t.category;
       expensesByCategory[catName] = (expensesByCategory[catName] || 0) + t.amount;
     });
-
-    // Add subscription expenses
     data.subscriptions.filter(s => s.active).forEach(s => {
       const catName = s.category.includes(':') ? s.category.split(':')[0] : s.category;
       expensesByCategory[catName] = (expensesByCategory[catName] || 0) + s.amount;
@@ -130,16 +122,115 @@ export const Dashboard: React.FC<Props> = ({ data }) => {
     const chartData = Object.entries(expensesByCategory)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 8); // Top 8 categories
+      .slice(0, 8);
 
-    return { income, totalExpense, balance, chartData, subscriptionsTotal };
+    return { income, totalExpense, balance, chartData, subscriptionsTotal, expensesByCategory };
   }, [data, currentMonth]);
 
   const currencyFormatter = (value: number) => 
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
 
+  const handleAnalyze = async () => {
+      if (!data.apiKey || !onUpdateAnalysis) return;
+      
+      setAnalyzing(true);
+      
+      try {
+          const ai = new GoogleGenAI({ apiKey: data.apiKey });
+          
+          const prompt = `
+            Actúa como un asesor financiero personal experto.
+            Analiza mis datos financieros de este mes (${currentMonth}):
+            
+            - Ingresos Totales: ${currencyFormatter(stats.income)}
+            - Gastos Totales (incluyendo suscripciones): ${currencyFormatter(stats.totalExpense)}
+            - Balance: ${currencyFormatter(stats.balance)}
+            - Gastos por Categoría: ${JSON.stringify(stats.expensesByCategory)}
+            - Suscripciones Activas: ${data.subscriptions.filter(s => s.active).map(s => `${s.name} ($${s.amount})`).join(', ')}
+            
+            Por favor, provee una respuesta corta y directa en texto plano (sin markdown complejo, usa saltos de línea) con:
+            1. Un diagnóstico de 1 frase sobre mi salud financiera actual.
+            2. Identifica 2 categorías donde estoy gastando mucho y sugiere una acción concreta para limitar gastos el próximo mes.
+            3. Una recomendación de ahorro específica basada en mi balance.
+            
+            Usa un tono alentador pero profesional.
+          `;
+
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+          });
+
+          if (response.text) {
+              onUpdateAnalysis(response.text);
+          }
+      } catch (error) {
+          console.error("AI Error:", error);
+          alert("Hubo un error conectando con Gemini. Verifica tu API Key.");
+      } finally {
+          setAnalyzing(false);
+      }
+  };
+
   return (
     <div ref={containerRef} className="space-y-6">
+      {/* AI Advisor Card */}
+      <div ref={aiRef} className="ai-card relative bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg overflow-hidden">
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+            <BrainCircuit size={120} />
+        </div>
+        
+        <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="text-yellow-300" />
+                <h3 className="font-bold text-lg">Asesor Financiero IA</h3>
+            </div>
+            
+            {!data.apiKey ? (
+                <div>
+                    <p className="mb-4 text-purple-100 text-sm">
+                        Conecta tu API Key de Gemini para recibir análisis personalizados de tus gastos y consejos de ahorro.
+                    </p>
+                    <button 
+                        onClick={onNavigateSettings}
+                        className="bg-white text-purple-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-purple-50 transition-colors"
+                    >
+                        Configurar API Key <ChevronRight size={16} />
+                    </button>
+                </div>
+            ) : (
+                <div>
+                    {data.lastAnalysis ? (
+                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 mb-4">
+                            <p className="text-sm leading-relaxed whitespace-pre-line font-medium">
+                                {data.lastAnalysis.content}
+                            </p>
+                            <p className="text-[10px] text-purple-200 mt-2 text-right">
+                                Analizado: {new Date(data.lastAnalysis.date).toLocaleDateString()}
+                            </p>
+                         </div>
+                    ) : (
+                        <p className="mb-4 text-purple-100 text-sm">
+                            Obtén un análisis detallado de tus finanzas y descubre dónde puedes ahorrar.
+                        </p>
+                    )}
+                    
+                    <button 
+                        onClick={handleAnalyze}
+                        disabled={analyzing}
+                        className={`bg-white text-purple-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-purple-50 transition-colors shadow-sm ${analyzing ? 'opacity-75 cursor-wait' : ''}`}
+                    >
+                        {analyzing ? (
+                            <><RefreshCw className="animate-spin" size={16}/> Analizando...</>
+                        ) : (
+                            <><Sparkles size={16}/> {data.lastAnalysis ? 'Actualizar Análisis' : 'Analizar mis Finanzas'}</>
+                        )}
+                    </button>
+                </div>
+            )}
+        </div>
+      </div>
+
       {/* Notifications Area */}
       {reminders.length > 0 && (
         <div className="space-y-3 mb-6">

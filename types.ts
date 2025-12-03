@@ -22,9 +22,16 @@ export interface Subscription {
   reminderDays?: number; // Custom days for payment reminders
 }
 
+export interface AiAnalysis {
+  date: string;
+  content: string;
+}
+
 export interface MoniData {
   transactions: Transaction[];
   subscriptions: Subscription[];
+  apiKey?: string;
+  lastAnalysis?: AiAnalysis;
 }
 
 export type ViewState = 'dashboard' | 'transactions' | 'subscriptions' | 'settings';
