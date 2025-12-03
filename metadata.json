@@ -1,0 +1,5 @@
+{
+  "name": "Moni",
+  "description": "Una aplicación integral para la gestión de finanzas personales, seguimiento de gastos, ingresos y suscripciones con almacenamiento local.",
+  "requestFramePermissions": []
+}
