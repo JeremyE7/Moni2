@@ -1,0 +1,153 @@
+{
+  "transactions": [
+    {
+      "type": "expense",
+      "amount": 1,
+      "category": "Alimentación: Supermercado",
+      "description": "cosas que compre",
+      "date": "2026-01-06",
+      "id": "1315a28d-7f50-4418-8e2b-5c7a68ebf028"
+    },
+    {
+      "type": "expense",
+      "amount": 24,
+      "category": "Alimentación: Supermercado",
+      "description": "cositas que compre de comida y eso",
+      "date": "2026-01-06",
+      "id": "25d0ba0d-8870-4b2d-97ec-cf0b065fffee"
+    },
+    {
+      "type": "expense",
+      "amount": 2,
+      "category": "Regalos: Cumpleaños / Eventos",
+      "description": "Mishell",
+      "date": "2026-01-06",
+      "id": "0a9d0fbc-968a-493e-aef3-a5547716cf05"
+    },
+    {
+      "type": "expense",
+      "amount": 3,
+      "category": "Ocio: Videojuegos",
+      "description": "el peak",
+      "date": "2026-01-06",
+      "id": "d2f6115e-72cb-40f9-ac0f-b96fb9dd3815"
+    },
+    {
+      "type": "expense",
+      "amount": 5,
+      "category": "Regalos: Donaciones / Caridad",
+      "description": "a la nico xd",
+      "date": "2026-01-06",
+      "id": "ce567031-bdc6-4fd2-9237-7905c7892511"
+    },
+    {
+      "type": "expense",
+      "amount": 12,
+      "category": "Alimentación: Bebidas / Alcohol",
+      "description": "cuando tome con mera y brayan",
+      "date": "2026-01-06",
+      "id": "47f274e5-e375-4b19-9ebf-b8951280eaf6"
+    },
+    {
+      "type": "expense",
+      "amount": 4.75,
+      "category": "Alimentación: Comida Rápida / Delivery",
+      "description": "",
+      "date": "2026-01-06",
+      "id": "662c51a4-1505-44c5-9641-8712fa4b5270"
+    },
+    {
+      "type": "expense",
+      "amount": 4.5,
+      "category": "Alimentación: Restaurantes",
+      "description": "",
+      "date": "2026-01-06",
+      "id": "32122141-d2e7-4646-bd18-57e4594cbc72"
+    },
+    {
+      "type": "expense",
+      "amount": 2.5,
+      "category": "Transporte: Taxi / Uber / Apps",
+      "description": "",
+      "date": "2026-01-06",
+      "id": "02d89daf-fbad-483f-a38e-66b0d391b5d9"
+    },
+    {
+      "type": "expense",
+      "amount": 3.5,
+      "category": "Transporte: Transporte Público",
+      "description": "",
+      "date": "2026-01-06",
+      "id": "aef93fdb-1291-4f91-9796-12b979b6cf58"
+    },
+    {
+      "type": "expense",
+      "amount": 2.5,
+      "category": "Alimentación: Café y Snacks",
+      "description": "",
+      "date": "2026-01-06",
+      "id": "6dab303f-1185-4013-9b57-2b76125f16b8"
+    },
+    {
+      "type": "expense",
+      "amount": 10,
+      "category": "Tecnología: Software / Apps",
+      "description": "copilot pendejo que se cobro solito",
+      "date": "2026-01-06",
+      "id": "9afc5c89-b0bf-4d9a-9c8b-3392e70c0cb8"
+    },
+    {
+      "type": "expense",
+      "amount": 180,
+      "category": "Vivienda: Alquiler",
+      "description": "",
+      "date": "2026-01-01",
+      "id": "783d3905-a5c8-4711-9fbb-a594745d943a"
+    },
+    {
+      "type": "income",
+      "amount": 574,
+      "category": "Salario",
+      "description": "",
+      "date": "2026-01-01",
+      "id": "df3b3b0a-9683-441b-8422-b367ad3043f1"
+    }
+  ],
+  "subscriptions": [
+    {
+      "name": "gimnasio",
+      "amount": 28,
+      "category": "Salud: Gimnasio / Deportes",
+      "billingDay": 5,
+      "active": true,
+      "reminderType": "payment",
+      "reminderDays": 3,
+      "id": "b167ac90-83f6-4bac-b7bf-ea6fd29341a9"
+    },
+    {
+      "name": "Spotify",
+      "amount": 4,
+      "category": "Tecnología: Software / Apps",
+      "billingDay": 15,
+      "active": true,
+      "reminderType": "payment",
+      "reminderDays": 3,
+      "id": "026e7b36-34d6-423f-be1e-890960f790c7"
+    },
+    {
+      "name": "datos",
+      "amount": 10.5,
+      "category": "Servicios: Teléfono Móvil",
+      "billingDay": 6,
+      "active": true,
+      "reminderType": "payment",
+      "reminderDays": 3,
+      "id": "c60d3bae-8f99-4e02-8e94-72dfc2178ec7"
+    }
+  ],
+  "apiKey": "AIzaSyB7jTvq2FVhf4nrrZD8YP186WAD47KGY8w",
+  "lastAnalysis": {
+    "date": "2026-01-06T13:56:21.358Z",
+    "content": "Su salud financiera actual es muy buena, con gastos bien controlados y un excelente balance positivo este mes.\n\nEstá gastando significativamente en Alimentación ($48.75); para limitar, planifique sus comidas semanalmente y cocine más en casa.\nLa categoría Salud ($28) es otra área; evalúe el uso de su suscripción al gimnasio y considere alternativas de ejercicio más económicas si no lo utiliza a menudo.\n\nCon un balance de $276.75, le recomiendo destinar al menos $150 a un fondo de emergencia o cuenta de ahorro para empezar a construir su seguridad financiera."
+  }
+}
